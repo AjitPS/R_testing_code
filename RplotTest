@@ -1,0 +1,70 @@
+package rintegration;
+ 
+import java.io.File;
+import javax.swing.ImageIcon;
+import rcaller.*; 
+ 
+public class RplotTest {
+ 
+    public RplotTest() {
+       try {
+            RCaller caller = new RCaller();
+            RCode rc = new RCode();
+//            caller.setRscriptExecutable("/usr/bin/Rscript");
+            caller.setRscriptExecutable("C:\\Program Files\\R\\R-3.0.1\\bin\\Rscript.exe");
+            // ^^^Note: our Rscript is at: "C:\Program Files\R\R-3.0.1\bin\Rscript.exe". 
+            // Look into how to do this when R is on a central server.
+            caller.cleanRCode();
+// test...
+//System.out.println("\t Initialization RCode: "+ caller.getRCode());
+            caller.setRCode(rc);
+            double[] numbers = new double[] {1, 4, 3, 5, 6, 10};
+// v-kt/mz,r-sk/ba,a-mf/ka
+// test...
+Globals.detect_current_rscript();
+System.out.println("\n \t Globals.Rscript_current: "+ Globals.Rscript_current + "\t & Globals.R_current: "+ 
+       Globals.R_current);
+
+double[][] arr= new double[10][2];
+arr[0][0]=1;
+arr[0][1]=13;
+arr[1][0]=2;
+arr[1][1]=15;
+arr[2][0]=3;
+arr[2][1]=14;
+arr[3][0]=4;
+arr[3][1]=12;
+arr[4][0]=5;
+arr[4][1]=11;
+arr[5][0]=6;
+arr[5][1]=6;
+arr[6][0]=7;
+arr[6][1]=0;
+arr[7][0]=8;
+arr[7][1]=7;
+arr[8][0]=9;
+arr[8][1]=-2;
+arr[9][0]=10;
+arr[9][1]=20;
+rc.addDoubleMatrix("SPCarray", arr);
+rc.addRCode("test <- nlme(flux ~ b0 * exp((b1*soiltemp) - (b2*soiltemp^2)) * vpd^b3 * mstsoil2^b4 * airtemp^b5, "
+   + "data = ac5, fixed = list(b0 + b1 + b2 + b3 + b4 + b5 ~ 1), random = chamber ~ 1, start = c(b0 = 570, b1 = 0.08, "
+   + "b2 = 0.002, b3 = -0.06, b4 = 3, b5 = 0.3), subset = airtemp > 0)");
+            rc.addDoubleArray("x", numbers);
+            File file = rc.startPlot();
+            rc.addRCode("plot.ts(x)"); // plot a time series in R.
+            rc.endPlot();
+            caller.runOnly();
+            ImageIcon ii = rc.getPlot(file); 
+            rc.showPlot(file); // show the plotted time series in Java.
+        } 
+        catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }
+    
+    public static void main(String[] args) {
+        new RplotTest();
+    }
+ 
+}
